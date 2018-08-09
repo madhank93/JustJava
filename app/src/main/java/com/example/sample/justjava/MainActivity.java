@@ -6,6 +6,7 @@ import android.view.View;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -22,46 +23,69 @@ public class MainActivity extends AppCompatActivity {
 	 * This method is called when the increment button is clicked.
 	 */
 	public void increment(View view) {
-		initialCoffeeQuantity = initialCoffeeQuantity + 1;
-		displayQuanity(initialCoffeeQuantity);
-	}
-
+        if (initialCoffeeQuantity == 100) {
+            Toast.makeText(this,"You cannot have more than 100 coffees",Toast.LENGTH_SHORT).show();
+            return;
+        }
+        initialCoffeeQuantity = initialCoffeeQuantity + 1;
+        displayQuanity(initialCoffeeQuantity);
+    }
 	/**
 	 * This method is called when the decrement button is clicked.
 	 */
 	public void decrement(View view) {
-		if (initialCoffeeQuantity > 1) {
-			initialCoffeeQuantity = initialCoffeeQuantity - 1;
-			displayQuanity(initialCoffeeQuantity);
+		if (initialCoffeeQuantity == 1) {
+            Toast.makeText(this,"You cannot have less than 1 coffee",Toast.LENGTH_SHORT).show();
+            return;
 		}
+        initialCoffeeQuantity = initialCoffeeQuantity - 1;
+        displayQuanity(initialCoffeeQuantity);
 	}
 
 	/**
 	 * This method is called when the order button is clicked.
 	 */
 	public void submitOrder(View view) {
-		int price = calculatePrice();
+		int price = 0;
 
+		// To figure out whipped cream is checked
 		CheckBox whippedCreamCheckbox = (CheckBox) findViewById(R.id.checkWhippedCream);
 		boolean hasWhippedCream = whippedCreamCheckbox.isChecked();
 
+        // To figure out chocolate is checked
         CheckBox chocolateCheckbox = (CheckBox) findViewById(R.id.checkChocolate);
         boolean hasChocolate = chocolateCheckbox.isChecked();
 
+        // To get User's name
         EditText summaryNameEditText = (EditText) findViewById(R.id.order_summary_name);
         String editTextValue = summaryNameEditText.getText().toString();
 
+        // Calling the calculatePrice method by passing extra toppings info (choco/whip cream)
+        price = calculatePrice(hasChocolate,hasWhippedCream);
+
 		String priceMessage = createOrderSummary(price,hasWhippedCream,hasChocolate,editTextValue);
 		displayMessage(priceMessage);
+
 	}
 
 	/**
-	 * This method is used to calculate coffee price.
-	 *
+	 * This method is used to calculate order price.
+	 * @param hasChoco is whether or not user wants chocolate toppings.
+     * @param hasWhippCream is whether or not user wants whipped cream.
 	 * @return total price of the Coffee
 	 */
-	public int calculatePrice() {
-		return initialCoffeeQuantity * oneCoffeeCupPrice;
+	public int calculatePrice(Boolean hasChoco, Boolean hasWhippCream) {
+	    int toppingsPrice = 0;
+
+	    // Add $1 if user wants whipped cream
+        if (hasWhippCream) {
+            toppingsPrice = toppingsPrice + 1 ;
+        }
+        // Add $2 if user wants chocolate
+        if (hasChoco) {
+            toppingsPrice = toppingsPrice + 2;
+        }
+		return (toppingsPrice + oneCoffeeCupPrice) * initialCoffeeQuantity ;
 	}
 
 	/**
@@ -72,7 +96,7 @@ public class MainActivity extends AppCompatActivity {
 		return "Name: " + editTextValue
 				+ "\nAdd whipped cream? " + hasWhippedCream
                 + "\nAdd chocolate? " + hasChocolate
-				+ "\nQunatity: " + initialCoffeeQuantity
+				+ "\nQuantity: " + initialCoffeeQuantity
 				+ "\nTotal: " + "\u20B9" + " " + totalPrice
 				+ "\nThank You!";
 	}
